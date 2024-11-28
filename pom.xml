@@ -58,7 +58,7 @@
     </scm>
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/jcustenborder/kafka-connect-spooldir/issues</url>
+        <url>https://github.com/confluentinc/kafka-connect-spooldir/issues</url>
     </issueManagement>
     <properties>
         <jacoco.plugin.version>0.8.11</jacoco.plugin.version>
@@ -100,7 +100,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>[1.26,)</version>
+            <version>1.27.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.jcustenborder.parsers</groupId>
