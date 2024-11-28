@@ -31,12 +31,12 @@
     <name>kafka-connect-spooldir</name>
     <description>A Kafka Connect connector reading delimited files from the file system.
     </description>
-    <url>https://github.com/jcustenborder/kafka-connect-spooldir</url>
+    <url>https://github.com/confluentinc/kafka-connect-spooldir</url>
     <inceptionYear>2016</inceptionYear>
     <licenses>
         <license>
             <name>Apache License 2.0</name>
-            <url>https:/github.com/jcustenborder/kafka-connect-spooldir/LICENSE</url>
+            <url>https:/github.com/confluentinc/kafka-connect-spooldir/LICENSE</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -51,15 +51,25 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://github.com/jcustenborder/kafka-connect-spooldir.git</connection>
-        <developerConnection>scm:git:git@github.com:jcustenborder/kafka-connect-spooldir.git
+        <connection>scm:git:https://github.com/confluentinc/kafka-connect-spooldir.git</connection>
+        <developerConnection>scm:git:git@github.com:confluentinc/kafka-connect-spooldir.git
         </developerConnection>
-        <url>https://github.com/jcustenborder/kafka-connect-spooldir</url>
+        <url>https://github.com/confluentinc/kafka-connect-spooldir</url>
     </scm>
     <issueManagement>
         <system>github</system>
         <url>https://github.com/jcustenborder/kafka-connect-spooldir/issues</url>
     </issueManagement>
+    <properties>
+        <jacoco.plugin.version>0.8.11</jacoco.plugin.version>
+        <instruction.coverage.threshold>0.78</instruction.coverage.threshold>
+        <branch.coverage.threshold>0.60</branch.coverage.threshold>
+        <method.coverage.threshold>0.76</method.coverage.threshold>
+        <class.coverage.threshold>0.91</class.coverage.threshold>
+        <complexity.coverage.threshold>0.65</complexity.coverage.threshold>
+        <line.coverage.threshold>0.80</line.coverage.threshold>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.github.jcustenborder.kafka.connect</groupId>
@@ -90,7 +100,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>[1.19,)</version>
+            <version>[1.26,)</version>
         </dependency>
         <dependency>
             <groupId>com.github.jcustenborder.parsers</groupId>
@@ -129,6 +139,101 @@
                             <supportUrl>https://docs.confluent.io/kafka-connect-spooldir/current/index.html</supportUrl>
                             <supportSummary><![CDATA[This connector is <a href="https://www.confluent.io/subscription/">supported by Confluent</a> as part of a
                               <a href="https://www.confluent.io/product/confluent-platform/">Confluent Platform</a> subscription.]]></supportSummary>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>prepare-agent-it</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                    </execution>
+                    <execution>
+                        <id>merge-coverage-reports</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${project.basedir}</directory>
+                                    <includes>
+                                        <include>/target/jacoco.exec</include>
+                                        <include>/target/jacoco-it.exec</include>
+                                    </includes>
+                                </fileSet>
+                            </fileSets>
+                            <destFile>${project.basedir}/target/jacoco-aggregate.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${instruction.coverage.threshold}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>BRANCH</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${branch.coverage.threshold}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>COMPLEXITY</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${complexity.coverage.threshold}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${line.coverage.threshold}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>METHOD</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${method.coverage.threshold}</minimum>
+                                        </limit>
+                                        <limit>
+                                            <counter>CLASS</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${class.coverage.threshold}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                            <dataFile>${project.basedir}/target/jacoco-aggregate.exec</dataFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <dataFile>${project.basedir}/target/jacoco-aggregate.exec</dataFile>
                         </configuration>
                     </execution>
                 </executions>
