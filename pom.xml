@@ -31,12 +31,12 @@
     <name>kafka-connect-spooldir</name>
     <description>A Kafka Connect connector reading delimited files from the file system.
     </description>
-    <url>https://github.com/jcustenborder/kafka-connect-spooldir</url>
+    <url>https://github.com/confluentinc/kafka-connect-spooldir</url>
     <inceptionYear>2016</inceptionYear>
     <licenses>
         <license>
             <name>Apache License 2.0</name>
-            <url>https:/github.com/jcustenborder/kafka-connect-spooldir/LICENSE</url>
+            <url>https:/github.com/confluentinc/kafka-connect-spooldir/LICENSE</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -51,10 +51,10 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://github.com/jcustenborder/kafka-connect-spooldir.git</connection>
-        <developerConnection>scm:git:git@github.com:jcustenborder/kafka-connect-spooldir.git
+        <connection>scm:git:https://github.com/confluentinc/kafka-connect-spooldir.git</connection>
+        <developerConnection>scm:git:git@github.com:confluentinc/kafka-connect-spooldir.git
         </developerConnection>
-        <url>https://github.com/jcustenborder/kafka-connect-spooldir</url>
+        <url>https://github.com/confluentinc/kafka-connect-spooldir</url>
     </scm>
     <issueManagement>
         <system>github</system>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>[1.19,)</version>
+            <version>[1.26,)</version>
         </dependency>
         <dependency>
             <groupId>com.github.jcustenborder.parsers</groupId>
