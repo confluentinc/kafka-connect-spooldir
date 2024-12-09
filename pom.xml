@@ -24,7 +24,7 @@
         <version>2.8.0-1</version>
     </parent>
     <artifactId>kafka-connect-spooldir</artifactId>
-    <version>2.0.66</version>
+    <version>2.0.67-SNAPSHOT</version>
     <name>kafka-connect-spooldir</name>
     <description>A Kafka Connect connector reading delimited files from the file system.
     </description>
@@ -52,7 +52,7 @@
         <developerConnection>scm:git:git@github.com:confluentinc/kafka-connect-spooldir.git
         </developerConnection>
         <url>https://github.com/confluentinc/kafka-connect-spooldir</url>
-        <tag>kafka-connect-spooldir-2.0.66</tag>
+        <tag>2.0.x</tag>
     </scm>
     <issueManagement>
         <system>github</system>
