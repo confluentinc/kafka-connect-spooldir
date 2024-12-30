@@ -39,11 +39,11 @@
     </licenses>
     <developers>
         <developer>
-            <id>jcustenborder</id>
-            <name>Jeremy Custenborder</name>
-            <url>https://github.com/jcustenborder</url>
+            <id>confluentinc/connect</id>
+            <organization>Confluent, Inc.</organization>
+            <organizationUrl>https://www.confluent.io</organizationUrl>
             <roles>
-                <role>Committer</role>
+                <role>maintainer</role>
             </roles>
         </developer>
     </developers>
