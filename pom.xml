@@ -126,6 +126,8 @@
                             <componentTypes>
                                 <componentType>source</componentType>
                             </componentTypes>
+                            <ownerName>Confluent, Inc.</ownerName>
+                            <ownerUsername>confluentinc</ownerUsername>
                             <tags>
                                 <tag>File</tag>
                                 <tag>Flume</tag>
