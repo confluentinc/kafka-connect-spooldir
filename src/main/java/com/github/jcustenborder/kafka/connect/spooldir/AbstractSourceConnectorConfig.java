@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.PatternFilenameFilter;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
+import org.apache.kafka.common.config.ConfigException;
 
 import java.io.File;
 import java.util.List;
@@ -148,6 +149,30 @@ public abstract class AbstractSourceConnectorConfig extends AbstractConfig {
     return result;
   }
 
+  public final Pattern getInputPattern(final String inputPatternText) {
+    Pattern inputPattern;
+    if (inputPatternText == null || inputPatternText.isEmpty()) {
+      throw new ConfigException(INPUT_FILE_PATTERN_CONF, inputPatternText, "Regex pattern cannot be null or empty.");
+    } else {
+      final int maxRegexPatternStringLength = 1000;
+      if (inputPatternText.length() > maxRegexPatternStringLength) {
+        throw new ConfigException(
+          INPUT_FILE_PATTERN_CONF,
+          inputPatternText,
+          "Regex pattern string is too long (length: " + inputPatternText.length() +
+          ", max allowed: " + maxRegexPatternStringLength + ")."
+        );
+      }
+
+      try {
+        inputPattern = Pattern.compile(inputPatternText);
+      } catch (java.util.regex.PatternSyntaxException e) {
+        throw new ConfigException("Invalid regex pattern syntax: " + e.getMessage(), e);
+      }
+    }
+    return inputPattern;
+  }
+
 
   public AbstractSourceConnectorConfig(ConfigDef definition, Map<?, ?> originals, boolean bufferedInputStream) {
     super(definition, originals);
@@ -170,7 +195,7 @@ public abstract class AbstractSourceConnectorConfig extends AbstractConfig {
     this.processingFileExtension = this.getString(PROCESSING_FILE_EXTENSION_CONF);
     this.timestampMode = ConfigUtils.getEnum(TimestampMode.class, this, TIMESTAMP_MODE_CONF);
     final String inputPatternText = this.getString(INPUT_FILE_PATTERN_CONF);
-    final Pattern inputPattern = Pattern.compile(inputPatternText);
+    final Pattern inputPattern = getInputPattern(inputPatternText);
     this.inputFilenameFilter = new PatternFilenameFilter(inputPattern);
     this.fileSortAttributes = ConfigUtils.getEnums(FileAttribute.class, this, FILE_SORT_ATTRIBUTES_CONF);
     this.taskIndex = getInt(TASK_INDEX_CONF);
