@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractSpoolDirSourceConnector<CONF extends AbstractSpoolDirSourceConnectorConfig> extends AbstractSourceConnector<CONF> {
   private static final Logger log = LoggerFactory.getLogger(AbstractSpoolDirSourceConnector.class);
-
+  private static final int MAX_FILENAME_LENGTH_ALLOWED = 1000;
   protected abstract AbstractSchemaGenerator<CONF> generator(Map<String, String> settings);
 
   @Override
@@ -57,7 +57,22 @@ public abstract class AbstractSpoolDirSourceConnector<CONF extends AbstractSpool
       AbstractSchemaGenerator<CONF> generator = generator(settings);
 
       try {
-        List<File> inputFiles = Arrays.stream(this.config.inputPath.listFiles(this.config.inputFilenameFilter))
+        File[] filesListedByRegex = this.config.inputPath.listFiles(this.config.inputFilenameFilter);
+        if (filesListedByRegex == null) {
+          filesListedByRegex = new File[0];
+        }
+
+        List<File> inputFiles = Arrays.stream(filesListedByRegex)
+            .filter(File::isFile)
+            .filter(file -> {
+              String filename = file.getName();
+              if (filename.length() > MAX_FILENAME_LENGTH_ALLOWED) {
+                log.warn("Filename '{}' (length: {}) in directory '{}' exceeds maximum allowed length of {} and will be skipped for schema inference.",
+                    filename, filename.length(), this.config.inputPath.getPath(), MAX_FILENAME_LENGTH_ALLOWED);
+                return false; // Exclude file if name is too long
+              }
+              return true; // Include file if name length is acceptable
+            })
             .limit(5)
             .collect(Collectors.toList());
         Preconditions.checkState(

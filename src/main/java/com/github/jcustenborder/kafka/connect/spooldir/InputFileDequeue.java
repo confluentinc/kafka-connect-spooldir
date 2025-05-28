@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 
 public class InputFileDequeue extends ForwardingDeque<InputFile> {
   private static final Logger log = LoggerFactory.getLogger(InputFileDequeue.class);
+  private static final int MAX_FILENAME_LENGTH_ALLOWED = 1000;
   private final AbstractSourceConnectorConfig config;
   private final FileComparator fileComparator;
   private final Predicate<File> processingFileExists;
@@ -74,6 +75,15 @@ public class InputFileDequeue extends ForwardingDeque<InputFile> {
         input = filesWalk.map(Path::toFile)
             .filter(File::isFile)
             .filter(filenameFilterPredicate)
+            .filter(file -> { 
+              String filename = file.getName();
+              if (filename.length() > MAX_FILENAME_LENGTH_ALLOWED) {
+                log.warn("Filename '{}' in directory '{}' (length: {}) exceeds maximum allowed length of {} and will be skipped during recursive walk.",
+                    filename, file.getParent(), filename.length(), MAX_FILENAME_LENGTH_ALLOWED);
+                return false; // Exclude file due to length
+              }
+              return true; // Include file as it passed the length check
+            })
             .toArray(File[]::new);
       } catch (IOException e) {
         log.error("Unexpected eror walking {}: {}", this.config.inputPath.toPath(), e.getMessage(), e);
