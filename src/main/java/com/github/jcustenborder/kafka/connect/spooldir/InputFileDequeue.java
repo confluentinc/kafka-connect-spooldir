@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 public class InputFileDequeue extends ForwardingDeque<InputFile> {
   private static final Logger log = LoggerFactory.getLogger(InputFileDequeue.class);
-  private static final int MAX_FILENAME_LENGTH_ALLOWED = 1000;
   private final AbstractSourceConnectorConfig config;
   private final FileComparator fileComparator;
   private final Predicate<File> processingFileExists;
@@ -69,29 +68,29 @@ public class InputFileDequeue extends ForwardingDeque<InputFile> {
 
     if (this.config.inputPathWalkRecursively) {
       final PatternFilenameFilter walkerFilenameFilter = this.config.inputFilenameFilter;
-      Predicate<File> filenameFilterPredicate = file -> walkerFilenameFilter.accept(file.getParentFile(), file.getName());
+
+      Predicate<File> filenameFilterPredicateWithTimeout = file -> {
+        return RegexTimeoutUtils.executeWithTimeout(
+            () -> walkerFilenameFilter.accept(file.getParentFile(), file.getName()),
+            100L,
+            false,
+            log
+        );
+      };
 
       try (Stream<Path> filesWalk = Files.walk(this.config.inputPath.toPath())) {
         input = filesWalk.map(Path::toFile)
             .filter(File::isFile)
-            .filter(filenameFilterPredicate)
-            .filter(file -> { 
-              String filename = file.getName();
-              if (filename.length() > MAX_FILENAME_LENGTH_ALLOWED) {
-                log.warn("Filename '{}' in directory '{}' (length: {}) exceeds maximum allowed length of {} and will be skipped during recursive walk.",
-                    filename, file.getParent(), filename.length(), MAX_FILENAME_LENGTH_ALLOWED);
-                return false; // Exclude file due to length
-              }
-              return true; // Include file as it passed the length check
-            })
+            .filter(filenameFilterPredicateWithTimeout)
             .toArray(File[]::new);
       } catch (IOException e) {
-        log.error("Unexpected eror walking {}: {}", this.config.inputPath.toPath(), e.getMessage(), e);
+        log.error("Unexpected error walking {}: {}", this.config.inputPath, e.getMessage(), e);
         return new ArrayDeque<>();
       }
     } else {
       input = this.config.inputPath.listFiles(this.config.inputFilenameFilter);
     }
+
 
     if (null == input || input.length == 0) {
       log.info("No files matching {} were found in {}", AbstractSourceConnectorConfig.INPUT_FILE_PATTERN_CONF, this.config.inputPath);
