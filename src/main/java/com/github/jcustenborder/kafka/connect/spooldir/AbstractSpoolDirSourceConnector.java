@@ -54,7 +54,6 @@ public abstract class AbstractSpoolDirSourceConnector<CONF extends AbstractSpool
     if (this.config.schemasRequired() && (null == this.config.valueSchema || null == this.config.keySchema)) {
       log.info("Key or Value schema was not defined. Running schema generator.");
       AbstractSchemaGenerator<CONF> generator = generator(settings);
-      
 
       try {
         File[] allEntriesInDir = this.config.inputPath.listFiles();

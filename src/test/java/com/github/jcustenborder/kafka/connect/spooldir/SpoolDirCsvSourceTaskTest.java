@@ -17,6 +17,7 @@ package com.github.jcustenborder.kafka.connect.spooldir;
 
 import com.github.jcustenborder.kafka.connect.utils.jackson.ObjectMapperFactory;
 import com.google.common.io.Files;
+import com.google.common.io.PatternFilenameFilter;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
 import org.apache.kafka.connect.data.Field;
@@ -36,13 +37,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
@@ -144,6 +150,5 @@ public class SpoolDirCsvSourceTaskTest extends AbstractSpoolDirSourceTaskTest<Sp
 
 
   }
-
 
 }
