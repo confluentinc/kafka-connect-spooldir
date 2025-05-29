@@ -68,20 +68,29 @@ public class InputFileDequeue extends ForwardingDeque<InputFile> {
 
     if (this.config.inputPathWalkRecursively) {
       final PatternFilenameFilter walkerFilenameFilter = this.config.inputFilenameFilter;
-      Predicate<File> filenameFilterPredicate = file -> walkerFilenameFilter.accept(file.getParentFile(), file.getName());
+
+      Predicate<File> filenameFilterPredicateWithTimeout = file -> {
+        return RegexTimeoutUtils.executeWithTimeout(
+            () -> walkerFilenameFilter.accept(file.getParentFile(), file.getName()),
+            100L,
+            false,
+            log
+        );
+      };
 
       try (Stream<Path> filesWalk = Files.walk(this.config.inputPath.toPath())) {
         input = filesWalk.map(Path::toFile)
             .filter(File::isFile)
-            .filter(filenameFilterPredicate)
+            .filter(filenameFilterPredicateWithTimeout)
             .toArray(File[]::new);
       } catch (IOException e) {
-        log.error("Unexpected eror walking {}: {}", this.config.inputPath.toPath(), e.getMessage(), e);
+        log.error("Unexpected error walking {}: {}", this.config.inputPath, e.getMessage(), e);
         return new ArrayDeque<>();
       }
     } else {
       input = this.config.inputPath.listFiles(this.config.inputFilenameFilter);
     }
+
 
     if (null == input || input.length == 0) {
       log.info("No files matching {} were found in {}", AbstractSourceConnectorConfig.INPUT_FILE_PATTERN_CONF, this.config.inputPath);
