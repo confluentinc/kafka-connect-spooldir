@@ -26,8 +26,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -68,21 +70,50 @@ public class InputFileDequeue extends ForwardingDeque<InputFile> {
 
     if (this.config.inputPathWalkRecursively) {
       final PatternFilenameFilter walkerFilenameFilter = this.config.inputFilenameFilter;
-      Predicate<File> filenameFilterPredicate = file -> walkerFilenameFilter.accept(file.getParentFile(), file.getName());
+
+      Predicate<File> filenameFilterPredicateWithTimeout = file -> {
+        return RegexTimeoutUtils.executeWithTimeout(
+            () -> walkerFilenameFilter.accept(file.getParentFile(), file.getName()),
+            100L,
+            false,
+            log
+        );
+      };
 
       try (Stream<Path> filesWalk = Files.walk(this.config.inputPath.toPath())) {
         input = filesWalk.map(Path::toFile)
             .filter(File::isFile)
-            .filter(filenameFilterPredicate)
+            .filter(filenameFilterPredicateWithTimeout)
             .toArray(File[]::new);
       } catch (IOException e) {
-        log.error("Unexpected eror walking {}: {}", this.config.inputPath.toPath(), e.getMessage(), e);
+        log.error("Unexpected error walking {}: {}", this.config.inputPath, e.getMessage(), e);
         return new ArrayDeque<>();
       }
     } else {
-      input = this.config.inputPath.listFiles(this.config.inputFilenameFilter);
-    }
+      File inputDirFile = this.config.inputPath;
+      String[] allNamesInDir = inputDirFile.list(); 
 
+      List<File> acceptedFiles = new ArrayList<>();
+      if (allNamesInDir != null) {
+        for (String name : allNamesInDir) {
+          File currentFile = new File(inputDirFile, name);
+          if (currentFile.isFile() &&
+              RegexTimeoutUtils.executeWithTimeout(
+                () -> this.config.inputFilenameFilter.accept(inputDirFile, name),
+                100L,
+                false, 
+                log
+            )) {
+            acceptedFiles.add(currentFile);
+          }
+        }
+      } else {
+        // This case handles if inputDirFile is not a directory or an I/O error occurs during list()
+        log.info("Could not list contents of input directory '{}', or directory is empty.", 
+            inputDirFile.getAbsolutePath());
+      }
+      input = acceptedFiles.toArray(new File[0]);
+    }
     if (null == input || input.length == 0) {
       log.info("No files matching {} were found in {}", AbstractSourceConnectorConfig.INPUT_FILE_PATTERN_CONF, this.config.inputPath);
       return new ArrayDeque<>();
