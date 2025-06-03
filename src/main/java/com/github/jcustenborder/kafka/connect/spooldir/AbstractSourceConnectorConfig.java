@@ -154,16 +154,6 @@ public abstract class AbstractSourceConnectorConfig extends AbstractConfig {
     if (inputPatternText == null || inputPatternText.isEmpty()) {
       throw new ConfigException(INPUT_FILE_PATTERN_CONF, inputPatternText, "Regex pattern cannot be null or empty.");
     } else {
-      final int maxRegexPatternStringLength = 1000;
-      if (inputPatternText.length() > maxRegexPatternStringLength) {
-        throw new ConfigException(
-          INPUT_FILE_PATTERN_CONF,
-          inputPatternText,
-          "Regex pattern string is too long (length: " + inputPatternText.length() +
-          ", max allowed: " + maxRegexPatternStringLength + ")."
-        );
-      }
-
       try {
         inputPattern = Pattern.compile(inputPatternText);
       } catch (java.util.regex.PatternSyntaxException e) {
