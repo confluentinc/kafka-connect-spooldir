@@ -19,6 +19,7 @@ import com.google.common.base.Joiner;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.ICSVParser;
+import com.opencsv.exceptions.CsvValidationException;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.SchemaAndValue;
 import org.apache.kafka.connect.data.Struct;
@@ -56,9 +57,14 @@ public class SpoolDirCsvSourceTask extends AbstractSpoolDirSourceTask<SpoolDirCs
     String[] fieldNames;
 
     if (this.config.firstRowAsHeader) {
-      log.trace("configure() - Reading the header row.");
-      fieldNames = this.csvReader.readNext();
-      log.info("configure() - field names from header row. fields = {}", Joiner.on(", ").join(fieldNames));
+      try {
+        log.trace("configure() - Reading the header row.");
+        fieldNames = this.csvReader.readNext();
+        log.info("configure() - field names from header row. fields = {}", Joiner.on(", ").join(fieldNames));
+      } catch (CsvValidationException e) {
+        throw new RuntimeException("Failed during csv validation", e);
+      }
+
     } else {
       log.trace("configure() - Using fields from schema {}", this.config.valueSchema.name());
       fieldNames = new String[this.config.valueSchema.fields().size()];
@@ -71,9 +77,13 @@ public class SpoolDirCsvSourceTask extends AbstractSpoolDirSourceTask<SpoolDirCs
 
     if (null != lastOffset) {
       log.info("Found previous offset. Skipping {} line(s).", lastOffset.intValue());
-      String[] row = null;
-      while (null != (row = this.csvReader.readNext()) && this.csvReader.getLinesRead() < lastOffset) {
-        log.trace("skipped row");
+      try {
+        String[] row;
+        while (null != (row = this.csvReader.readNext()) && this.csvReader.getLinesRead() < lastOffset) {
+          log.trace("skipped row");
+        }
+      } catch (CsvValidationException e) {
+        throw new RuntimeException("Failed during csv validation while skipping rows", e);
       }
     }
 
@@ -102,7 +112,12 @@ public class SpoolDirCsvSourceTask extends AbstractSpoolDirSourceTask<SpoolDirCs
     List<SourceRecord> records = new ArrayList<>(this.config.batchSize);
 
     while (records.size() < this.config.batchSize) {
-      String[] row = this.csvReader.readNext();
+      String[] row;
+      try {
+        row = this.csvReader.readNext();
+      } catch (CsvValidationException e) {
+        throw new RuntimeException("Failed during csv validation while reading data rows", e);
+      }
 
       if (null == row) {
         break;
