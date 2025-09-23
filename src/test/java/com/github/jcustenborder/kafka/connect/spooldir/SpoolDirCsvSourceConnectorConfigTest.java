@@ -4,6 +4,7 @@ package com.github.jcustenborder.kafka.connect.spooldir;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.ICSVParser;
+import com.opencsv.exceptions.CsvValidationException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 public class SpoolDirCsvSourceConnectorConfigTest {
 
   @Test
-  public void nullFieldSeparator() throws IOException {
+  public void nullFieldSeparator() throws IOException, CsvValidationException {
     Map<String, String> settings = new HashMap<>();
     settings.put(SpoolDirCsvSourceConnectorConfig.CSV_SEPARATOR_CHAR_CONF, "0");
     settings.put(SpoolDirCsvSourceConnectorConfig.TOPIC_CONF, "test");
