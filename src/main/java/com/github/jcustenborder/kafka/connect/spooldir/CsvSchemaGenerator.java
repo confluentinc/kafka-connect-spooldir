@@ -18,6 +18,7 @@ package com.github.jcustenborder.kafka.connect.spooldir;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.ICSVParser;
+import com.opencsv.exceptions.CsvValidationException;
 import org.apache.kafka.connect.data.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +51,19 @@ public class CsvSchemaGenerator extends AbstractSchemaGenerator<SpoolDirCsvSourc
         String[] headers = null;
 
         if (this.config.firstRowAsHeader) {
-          headers = csvReader.readNext();
+          try {
+            headers = csvReader.readNext();
+          } catch (CsvValidationException e) {
+            throw new RuntimeException("Failed during csv validation while reading header row", e);
+          }
         }
 
-        String[] row = csvReader.readNext();
+        String[] row;
+        try {
+          row = csvReader.readNext();
+        } catch (CsvValidationException e) {
+          throw new RuntimeException("Failed during csv validation while reading data row", e);
+        }
 
         if (null == headers) {
           headers = new String[row.length];
