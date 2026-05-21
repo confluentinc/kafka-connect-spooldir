@@ -34,7 +34,7 @@ blocks:
     dependencies: []
     run:
       # don't run the tests on non-functional changes...
-      when: "change_in('/', {exclude: ['/.deployed-versions/', '.github/', 'service.yml', 'README.md'], default_branch: 'master'})"
+      when: "change_in('/', {exclude: ['/.deployed-versions/', '/.github/', '/service.yml', '/README.md'], default_branch: 'master'})"
     task:
       jobs:
         - name: Test
@@ -77,6 +77,17 @@ blocks:
           commands:
             - git clone --branch master --single-branch git@github.com:confluentinc/connect-releases.git
             - ./connect-releases/tasks/release-connect-plugins/generate-connect-changelogs.sh
+  # Claude Code based code review in PRs.
+  - name: R2 Code Review
+    dependencies: []
+    run:
+      when: "pull_request =~ '.+'"
+    task:
+      jobs:
+        - name: R2 Code Review
+          commands:
+            # || true: code review failures are unrelated to the codebase and should not block CI. Please report issues to Slack channel #r2.
+            - r2 code-review --verbose --timeout=900s || true
 
 after_pipeline:
   task:
