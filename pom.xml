@@ -109,6 +109,20 @@
     <build>
         <plugins>
 
+            <!-- Inherited maven-javadoc-plugin:2.9.1 (and its log4j:1.2.14 dependency) from
+                 kafka-connect-parent no longer resolves against Confluent's Maven mirror.
+                 <skip> doesn't help since Maven must resolve the plugin before checking it;
+                 rebinding the inherited execution to phase "none" stops it being invoked at all. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>io.confluent</groupId>
                 <artifactId>kafka-connect-maven-plugin</artifactId>
