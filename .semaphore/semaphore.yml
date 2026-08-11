@@ -75,7 +75,6 @@ blocks:
             - git clone --branch master --single-branch git@github.com:confluentinc/connect-releases.git
             - ./connect-releases/tasks/release-connect-plugins/generate-connect-changelogs.sh
 
-# This is auto-managed by connect-ci-cd-pipelines semaphore task, to disable please reach out on slack #connect-testability
   - name: Connector Kafka Docker Playground Test
     dependencies: []
     run:
