@@ -73,6 +73,12 @@
             <groupId>com.github.jcustenborder.kafka.connect</groupId>
             <artifactId>connect-utils-parser</artifactId>
         </dependency>
+        <!-- Pin freemarker: connect-utils pulls in a vulnerable version transitively (CVE-2026-84939). -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.35</version>
+        </dependency>
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>
             <artifactId>argparse4j</artifactId>
